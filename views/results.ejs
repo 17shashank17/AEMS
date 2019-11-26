@@ -1,0 +1,187 @@
+<!--::header part start::-->
+<header class="main_menu home_menu">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-12">
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <a class="navbar-brand" href="/">
+                        <h1>AEMS</h1>
+                        <h2 id="problem_status"><%= data[1].problem %></h2>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse"
+                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse main-menu-item justify-content-center"
+                        id="navbarSupportedContent">
+                        <ul class="navbar-nav align-items-center">
+
+                        </ul>
+                    </div>
+
+
+                    <a class="btn_2 d-none d-lg-block" href="/ambulance/login">Login</a>
+                </nav>
+            </div>
+        </div>
+</header>
+<!-- Header part end-->
+
+<!-- banner part start-->
+<% include ./partials/msg.ejs %>
+
+<section class="banner_part">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <br><br>
+                <h2>The location entered is <span id="patient_x"><%= data[3].patient_x %></span>-<span id="patient_y"><%= data[3].patient_y %></span></h2>
+                <div class="banner_text">
+                    <div class="banner_text_iner">
+                        <h1>Emergency Ambulance Called</h1>
+
+
+                        <div>
+                            <% if(typeof(data[2].statement)=='string'){ %>
+                            <h2><%= data[2].statement %></h2>
+                            <% } %>
+                            <h3>Ambulance data:</h3>
+                            <table class="table table-bordered table-striped">
+                                <tr>
+                                    <th>Ambulance Vehicle No.</th>
+                                    <th>Location coordinate</th>
+                                    <th>Problem</th>
+                                    <th>Driver Name</th>
+                                    <th>Driver Contact Number</th>
+                                </tr>
+                                <tr>
+                                    <td id="vehicle"><%= data[0].vehicle_no %></td>
+                                    <td><%= data[0].x %>-<%= data[0].y %></td>
+                                    
+                                    <td id="problem"><%= data[0].problem %></td>
+                                   
+                                    <td><%= data[2].driver_name %></td>
+                                    <td><%= data[2].contact_no %></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="banner_text">
+                    <div class="banner_text_iner">
+                        <h1>Hospital alloted</h1>
+
+
+                        <div>
+                            <h3>Hospital data:</h3>
+
+                            <table class="table table-bordered table-striped">
+                                <tr>
+                                    <th>Hospital ID</th>
+                                    <th>Location coordinate</th>
+                                </tr>
+                                <tr>
+                                    <td id="hid"><%= data[1].hid %></td>
+                                    <td><span id="hidx"><%= data[1].x %></span>-<span id="hidy"><%= data[1].y %></span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div>
+                            <h3>Estimates Charges:</h3>
+                            <table class="table table-bordered table-striped">
+                                <tr>
+                                    <th>Base Fare</th>
+                                    <th>Charges per km</th>
+                                    <th>Distance</th>
+                                    <th>Total Commute Cost</th>
+                                    <% if(data.length>4) {%>
+                                    <th>Total Equipment Cost</th>
+                                    <th>Total Cost</th>
+                                    <% } %>
+                                </tr>
+                                <tr>
+                                    <td><%= data[0].base_fare %></td>
+                                    <td><%= data[0].charge_per_km %></td>
+                                    <td><%= parseInt(data[1].distance) %></td>
+                                    
+                                    <% if(data.length>4) {%>
+                                        <td id="payment"><%= data[1].cost %></td>
+                                        <td><%= data[4].total_equipment_cost %></td>
+                                        <td id="payment_info"><%= parseInt(data[4].total_cost) %></td>
+                                    <%} else {%>
+                                        <td id="payment_info"><%= data[1].cost %></td>
+                                    <% } %>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <h2 id="after_post"></h2>
+                <button class="btn_2" href="" name="confirm_booking" id="confirm">Confirm Booking</button>
+                <button class="btn_2" id="go_back" href="main.ejs">Go Back</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- banner part start-->
+
+
+<script>
+    document.getElementById('confirm').addEventListener('click', (e) => {
+        //e.preventDefault();
+        console.log("hello")
+        var vehicle = document.getElementById('vehicle');
+        console.log(vehicle.innerHTML);
+        var x = vehicle.innerHTML;
+        var path = '/ambulance/change_status_available/5';
+        var problem = document.getElementById('problem').innerHTML;
+        console.log("till here")
+        var hid = document.getElementById('hid').innerHTML;
+        console.log("till here1")
+        var hidx = document.getElementById('hidx').innerHTML;
+        var hidy = document.getElementById('hidy').innerHTML;
+        var patient_x = document.getElementById('patient_x').innerHTML;
+        var patient_y = document.getElementById('patient_y').innerHTML;
+        console.log('done till here')
+        var payment_info = document.getElementById('payment_info').innerHTML;
+        console.log(hid, hidx, hidy, patient_x, patient_y, payment_info)
+
+        fetch('/ambulance/confirmation/' + x, {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "problem": problem,
+                    "hidx": hidx,
+                    "hidy": hidy,
+                    "patient_x": patient_x,
+                    "patient_y": patient_y,
+                    "hid": hid,
+                    "payment_info": payment_info,
+                }),
+            })
+            .then((response) => {
+                return response.json()
+            })
+            .then((data) => {
+                console.log('Post request created', data);
+                document.getElementById('confirm').style.visibility = "hidden";
+                //document.getElementById('after_post').innerHTML = "Your Ambulance is On the Way";
+            });
+
+    });
+    document.getElementById('go_back').addEventListener('click', (e) => {
+        window.location = 'http://localhost:8080/';
+    })
+</script>

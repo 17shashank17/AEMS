@@ -1,0 +1,158 @@
+<!--::header part start::-->
+<header class="main_menu home_menu">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-12">
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <a class="navbar-brand" href="/">
+                        <h1>AEMS</h1>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse"
+                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse main-menu-item justify-content-center"
+                        id="navbarSupportedContent">
+                        <ul class="navbar-nav align-items-center">
+                            <% if(typeof(vehicle_no)!='string') {%>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/dashboard/register">Register Your Ambulance</a>
+                            </li>
+                            <% } %>
+                        </ul>
+                    </div>
+                    <a class="btn_2 d-none d-lg-block" href="/ambulance/logout">Logout <%= username %></a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Header part end-->
+
+<!-- banner part start-->
+<section class="banner_part">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-12">
+                <div class="banner_text">
+                    <div class="banner_text_iner">
+                        <h1>Ambulance Dashboard</h1>
+
+                        <% if(typeof(vehicle_no)=='string') {%>
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <th>Ambulance Number</th>
+                                <th>Current Status</th>
+                                <th>Toggle status</th>
+                            </tr>
+                            <tr>
+                                <td><%= vehicle_no %></td>
+                                <td>
+                                    <h2 id="status"><%= status %></h2>
+                                </td>
+                                <td><button class="btn-success" href="" name="change-status" id="change-avl-status">I'm
+                                        available now</button></td>
+                            </tr>
+                        </table>
+                        <% } %>
+                        
+                        <div id="new_booking" style="visibility: hidden;">
+                            <h2 id="text_append"></h2>
+                                <table class="table table-bordered table-striped">
+                                        <tr>
+                                            <th>Patient Location</th>
+                                            <th>Hospital ID</th>
+                                            <th>Hospital Location</th>
+                                            <th>Bill</th>
+                                        </tr>
+                                        <tr>
+                                            <td><span id="patient_x"></span>-<span id="patient_y"></span></td>
+                                            <td id="hid"></td>
+                                            <td>
+                                                    <span id="hidx"></span>-<span id="hidy"></span>
+                                            </td>
+                                            <td id="bill"></td>
+                                        </tr>
+                                    </table>
+                        </div>
+                        <script>
+                            document.getElementById('change-avl-status').addEventListener('click', (e) => {
+                                e.preventDefault();
+                                var status = document.getElementById('status');
+                                var new_booking=document.getElementById('new_booking')
+                                new_booking.style.visibility="hidden";
+                                var arr = [];
+                                if (status.innerHTML == "Not Available")
+                                    arr.push({
+                                        'status': 'Available'
+                                    });
+                                else
+                                    arr.push({
+                                        'status': 'Not Available'
+                                    });
+                                console.log(arr);
+                                
+                                fetch('/dashboard/change_status/', {
+                                        method: 'post',
+                                        body: arr,
+                                    })
+                                    .then((response) => {
+                                        return response.json()
+                                    })
+                                    .then((data) => {
+                                        status.innerHTML = 'Available';
+                                        document.getElementById('change-avl-status').style.visibility =
+                                            "hidden";
+                                        console.log('Post request created', data);
+                                    });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- banner part start-->
+
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    $(function () {
+        var socket = io.connect();
+        var new_booking=document.getElementById('new_booking')
+        var $div = $('#new_booking')
+        var vehicle_no = document.getElementById('vehicle_id')
+        var patient_x=document.getElementById('patient_x');
+        var patient_y=document.getElementById('patient_y');
+        var hid=document.getElementById('hid');
+        var hidx=document.getElementById('hidx')
+        var hidy=document.getElementById('hidy')
+        var bill=document.getElementById('bill')
+        var test_append=document.getElementById('text_append');
+
+
+
+        console.log('waiting for event');
+        socket.on('send detail to driver', function (data) {
+            console.log('data', data);
+            console.log(data[0].vehicle_no);
+            if (vehicle_no = data[0].vehicle_no) {
+                test_append.innerHTML="New Booking";
+                console.log("in if",data[0].vehicle_no)
+                new_booking.style.visibility="visible";
+                patient_x.innerHTML=data[0].patient_x;
+                patient_y.innerHTML=data[0].patient_y;
+                hid.innerHTML=data[0].hid;
+                hidx.innerHTML=data[0].hidx;
+                hidy.innerHTML=data[0].hidy;
+                bill.innerHTML=data[0].payment_info;
+
+            }
+        })
+    })
+</script>
+
+</html>
