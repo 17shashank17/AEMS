@@ -11,8 +11,8 @@ var router=express.Router()
 
 var db = mysql.createConnection({
     host     : 'localhost',
-    user     : 'saurabh',
-    password : 'Saurabh@2021',
+    user     : '17shashank17',
+    password : 'lelopassword@',
     database : 'aems'
 });
 
@@ -122,6 +122,7 @@ var bodyparser=require('body-parser');
 urlencoded=bodyparser.urlencoded({extended:true})
 
 router.post('/confirmation/:vehicle_no',urlencoded,(req,res)=>{
+    console.log('vehicle_no',req.params.vehicle_no)
     db.query(`update Ambulance_loc set status='Not Available' where vehicle_no='${req.params.vehicle_no}'`,(err,result)=>{
         if(err) console.log('Error ocuured while updation');
         else{
@@ -143,8 +144,6 @@ router.post('/confirmation/:vehicle_no',urlencoded,(req,res)=>{
                 console.log('inside amulance io');
                 io.sockets.emit('send detail to driver',data);
             })
-            console.log('ends here  ');
-            console.log('body',req.body)
             if(req.body.problem!='')
                 optimizeAmbulanceLocation(req.body.problem)
             console.log('starts here');

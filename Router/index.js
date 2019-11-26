@@ -8,6 +8,8 @@ var reader=require('csv-reader');
 const {ensureAuthenticated}=require('../config/auth');
 
 var app=express.Router();
+// var localstorage=require('node-localstorage');
+// localStorage = new LocalStorage('./scratch');
 
 var ejs=require('ejs');
 var bodyparser=require('body-parser');
@@ -16,8 +18,8 @@ urlencodedparser=bodyparser.urlencoded({extended: false});
 
 var db = mysql.createConnection({
     host     : 'localhost',
-    user     : 'saurabh',
-    password : 'Saurabh@2021',
+    user     : '17shashank17',
+    password : 'lelopassword@',
     database : 'aems'
 });
 
@@ -139,9 +141,10 @@ app.post('/',urlencodedparser,(req,res)=>{
     /*var xhr=new XMLHttpRequest();
     xhr.open('POST','http://localhost:8080/dashboard',{'a':'b'})
     xhr.send();*/
-
-    if (typeof(req.body.problem)!='string'){
+    console.log("data from client",req.body)
+    if (typeof(req.body.problem)!='string' || req.body.problem=="General"){
         var data=[];
+        var hospital_data=[]
         var amb_vehicle_no = 0;
         var total_distance = 0;
         db.query(`Select * from Ambulance_loc where status='Available'`,(err,results)=>{
@@ -160,8 +163,14 @@ app.post('/',urlencodedparser,(req,res)=>{
             }
             // console.log(results[min_distance_index].vehicle_no);
             amb_vehicle_no = results[min_distance_index].vehicle_no
-            data.push({vehicle_no:results[min_distance_index].vehicle_no,x:results[min_distance_index].x,y:results[min_distance_index].y,
-                base_fare:results[min_distance_index].base_fare, charge_per_km:results[min_distance_index].charge_per_km});
+            data.push({
+                vehicle_no:results[min_distance_index].vehicle_no,
+                x:results[min_distance_index].x,
+                y:results[min_distance_index].y,
+                base_fare:results[min_distance_index].base_fare, 
+                charge_per_km:results[min_distance_index].charge_per_km,
+                problem:'General'
+            });
         });
         db.query(`Select * from Hospitals`,(err,results)=>{
             if(err) throw err;
@@ -169,6 +178,7 @@ app.post('/',urlencodedparser,(req,res)=>{
                 var min_dist=20000;
                 var min_index=-1;
                 var k=0;
+                hospital_data=results;
                 for (i of results){
                     x=findistance([i.x,i.y],[req.body.x,req.body.y])
                     if(x<min_dist){
@@ -177,12 +187,10 @@ app.post('/',urlencodedparser,(req,res)=>{
                     }
                     k+=1
                 }
-                //Hospital Found
-                // console.log(results[min_index])
+
             }
             total_distance = min_dist;
             var cost = data[0].base_fare + (min_dist*data[0].charge_per_km);
-            // console.log('cost', cost);
             console.log("results of query",results[min_index])
             data.push({hid:results[min_index].hid,
                 x:results[min_index].x,
@@ -190,28 +198,27 @@ app.post('/',urlencodedparser,(req,res)=>{
                 cost:parseInt(cost), 
                 distance:min_dist,
             });
-            // console.log('inside if',data)
-            // res.render('results',{data:data});
+
             console.log(amb_vehicle_no);
             db.query(`select * from Ambulance_driver where vehicle_no='${amb_vehicle_no}'`,(err,results)=>{
                 if(err) console.log('this is the error', results);
                 else{
-                    // console.log('these results', results)
                     data.push({contact_no:results[0].contact_no, driver_name:results[0].driver_name})
                     data.push({
                         patient_x:req.body.x,
                         patient_y:req.body.y
                     })
-                    // console.log('inside if',data);
-                    res.render('results',{data:data});
+                    // localstorage.setItem('data',data);
+                    res.render('results',{data:data,hospital_data:JSON.stringify(hospital_data)});
                 }
             });
-            // console.log('inside if',data)
 
         });
     }
     else{
         var data=[];
+        var hospital_data=[]
+        var ambulance_data=[]
         var amb_vehicle_no = 0;
         db.query(`insert into Patient_records(x,y,disease) values('${req.body.x}','${req.body.y}','${req.body.problem}')`,(err,results)=>{
             if(err) throw err;
@@ -237,7 +244,6 @@ app.post('/',urlencodedparser,(req,res)=>{
                         }
                         k+=1
                     }
-                    //Ambulance found
                     console.log(results[min_index]);
 
                 amb_vehicle_no = results[min_index].vehicle_no
@@ -245,6 +251,8 @@ app.post('/',urlencodedparser,(req,res)=>{
                 db.query(`Select * from Hospitals`,(err,results)=>{
                     if(err) throw err;
                     else{
+                        hospital_data=results;
+                        console.log('hospital_data',hospital_data);
                         var min_dist=20000;
                         var min_index=-1;
                         var k=0;
@@ -256,10 +264,8 @@ app.post('/',urlencodedparser,(req,res)=>{
                             }
                             k+=1;
                         }
-                        //Hospital Found
                         console.log(results[min_index]);
                     }
-                    console.log('@@@@@@',data)
                     total_distance = min_dist;
                     var cost = data[0].base_fare + (min_dist*data[0].charge_per_km);
                     data.push({hid:results[min_index].hid,x:results[min_index].x,y:results[min_index].y,cost:parseInt(cost), distance:min_dist});
@@ -291,21 +297,22 @@ app.post('/',urlencodedparser,(req,res)=>{
                                     total_cost: sum_of_prices+cost
                                 });   
                                 console.log(data);
-                                res.render('results',{data:data,equipment_data:equipment_data});
+                                // hospital_data=JSON.stringify(hospital_data:hospital_data)
+                                res.render('results',{data:data,equipment_data:equipment_data,hospital_data:JSON.stringify(hospital_data)});
                             }
                         })
-                        //res.render('results',{data:data});
                     }
                 });
             });
             }
                 else{
+                    var hospital_data=[];
                     console.log('entered in else')
                     db.query(`Select * from Ambulance_loc where status='Available'`,(err,results)=>{
                         console.log('query executed');
                         if(err) throw console.log("Error Occured");
                         else{
-
+                            hospital_data=results;
                         var points=[];
                         k=0;
                         min_distance=99999;
@@ -320,8 +327,14 @@ app.post('/',urlencodedparser,(req,res)=>{
                             k+=1;
                         }
                         amb_vehicle_no = results[min_distance_index].vehicle_no
-                        data.push({vehicle_no:results[min_distance_index].vehicle_no,x:results[min_distance_index].x,y:results[min_distance_index].y,
-                            base_fare:results[min_distance_index].base_fare, charge_per_km:results[min_distance_index].charge_per_km});
+                        data.push({
+                            vehicle_no:results[min_distance_index].vehicle_no,
+                            x:results[min_distance_index].x,
+                            y:results[min_distance_index].y,
+                            base_fare:results[min_distance_index].base_fare, 
+                            charge_per_km:results[min_distance_index].charge_per_km,
+                            problem:req.body.problem
+                        });
                         }
                     });
                     db.query(`Select * from Hospitals`,(err,results)=>{
@@ -359,7 +372,7 @@ app.post('/',urlencodedparser,(req,res)=>{
                                 patient_y:req.body.y
                             })
                             console.log('@@@@@@data',data)
-                            res.render('results',{data:data});
+                            res.render('results',{data:data,hospital_data:hospital_data});
                         }
                     });
                 });

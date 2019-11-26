@@ -111,10 +111,47 @@
                 <button class="btn_2" href="" name="confirm_booking" id="confirm">Confirm Booking</button>
                 <button class="btn_2" id="go_back" href="main.ejs">Go Back</button>
             </div>
+            <object id="hospital_data" width="400" height="400" data="<%= hospital_data %>"></object>
+            <canvas id="canv" width="600" height="600"></canvas>
         </div>
+        
     </div>
+    
 </section>
 
+<script>
+    var i=5;
+
+    window.onload=function(){
+        hospital_data=document.getElementById('hospital_data').data;
+        console.log(hospital_data);
+        hospital_data=hospital_data.split("http://localhost:8080/");
+        hospital_data=hospital_data[1];
+        var data_encoded='';
+        for(var i=2;i<hospital_data.length-2;i++){
+            data_encoded+=hospital_data[i]
+        }
+        console.log(data_encoded)
+        data_decoded=decodeURI(data_encoded)
+        console.log(data_decoded);
+        data_decoded=data_decoded.split
+        //data=JSON.parse(data_decoded);
+        //console.log(data);
+        // hospital_data=JSON.parse(hospital_data);
+        // console.log(hospital_data);
+        
+        canv=document.getElementById("canv");
+        ctx=canv.getContext("2d");
+        ctx.fillStyle="linen";
+        ctx.fillRect(0,0,canv.width,canv.height);
+
+        ctx.fillStyle='blue';
+        ctx.beginPath();
+        ctx.arc(10, 10, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        
+    }
+</script>
 
 
 <!-- banner part start-->
