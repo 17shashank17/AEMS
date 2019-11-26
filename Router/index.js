@@ -16,8 +16,8 @@ urlencodedparser=bodyparser.urlencoded({extended: false});
 
 var db = mysql.createConnection({
     host     : 'localhost',
-    user     : '17shashank17',
-    password : 'lelopassword@',
+    user     : 'saurabh',
+    password : 'Saurabh@2021',
     database : 'aems'
 });
 
@@ -343,7 +343,7 @@ app.post('/',urlencodedparser,(req,res)=>{
                         }
                         total_distance = min_dist;
                         var cost = data[0].base_fare + (min_dist*data[0].charge_per_km);
-                        data.push({hid:results[min_index].ID,x:results[min_index].x,y:results[min_index].y,cost:parseInt(cost), distance:min_dist});
+                        data.push({hid:results[min_index].hid,x:results[min_index].x,y:results[min_index].y,cost:parseInt(cost), distance:min_dist});
                      
                         console.log('Ambulance number',amb_vehicle_no);
                         db.query(`select * from Ambulance_driver where vehicle_no='${amb_vehicle_no}'`,(err,results)=>{
@@ -352,7 +352,7 @@ app.post('/',urlencodedparser,(req,res)=>{
                             data.push({
                                 contact_no:results[0].contact_no,
                                 driver_name:results[0].driver_name,
-                                statement:'Ambulance according to disease is not available. Sending you the nearest Ambulance'
+                                statement:'Ambulance catering to the particular disease is not available. Sending you the best suitable nearest ambulance instead.'
                             })
                             data.push({
                                 patient_x:req.body.x,

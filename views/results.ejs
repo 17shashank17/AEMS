@@ -1,4 +1,4 @@
-<!--::header part start::-->
+<!-- ::header part start:: -->
 <header class="main_menu home_menu">
     <div class="container">
         <div class="row align-items-center">
@@ -6,22 +6,7 @@
                 <nav class="navbar navbar-expand-lg navbar-light">
                     <a class="navbar-brand" href="/">
                         <h1>AEMS</h1>
-                        <h2 id="problem_status"><%= data[1].problem %></h2>
                     </a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse"
-                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-
-                    <div class="collapse navbar-collapse main-menu-item justify-content-center"
-                        id="navbarSupportedContent">
-                        <ul class="navbar-nav align-items-center">
-
-                        </ul>
-                    </div>
-
-
                     <a class="btn_2 d-none d-lg-block" href="/ambulance/login">Login</a>
                 </nav>
             </div>
@@ -35,18 +20,18 @@
 <section class="banner_part">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-12 align-items-center">
                 <br><br>
-                <h2>The location entered is <span id="patient_x"><%= data[3].patient_x %></span>-<span id="patient_y"><%= data[3].patient_y %></span></h2>
+                <h2>The location entered is <span id="patient_x"><%= data[3].patient_x %></span>-<span
+                        id="patient_y"><%= data[3].patient_y %></span></h2>
                 <div class="banner_text">
                     <div class="banner_text_iner">
-                        <h1>Emergency Ambulance Called</h1>
-
-
+                        <h2>Emergency Ambulance has been called</h2>
                         <div>
                             <% if(typeof(data[2].statement)=='string'){ %>
-                            <h2><%= data[2].statement %></h2>
+                            <h4 style="color: red;;"><%= data[2].statement %></h4>
                             <% } %>
+                            <br>
                             <h3>Ambulance data:</h3>
                             <table class="table table-bordered table-striped">
                                 <tr>
@@ -59,9 +44,9 @@
                                 <tr>
                                     <td id="vehicle"><%= data[0].vehicle_no %></td>
                                     <td><%= data[0].x %>-<%= data[0].y %></td>
-                                    
+
                                     <td id="problem"><%= data[0].problem %></td>
-                                   
+
                                     <td><%= data[2].driver_name %></td>
                                     <td><%= data[2].contact_no %></td>
                                 </tr>
@@ -70,15 +55,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-12">
                 <div class="banner_text">
                     <div class="banner_text_iner">
-                        <h1>Hospital alloted</h1>
-
-
+                        <h2>Hospital has been alloted</h2>
+                        <br>
                         <div>
                             <h3>Hospital data:</h3>
-
                             <table class="table table-bordered table-striped">
                                 <tr>
                                     <th>Hospital ID</th>
@@ -92,6 +75,7 @@
                             </table>
                         </div>
                         <div>
+                            <br>
                             <h3>Estimates Charges:</h3>
                             <table class="table table-bordered table-striped">
                                 <tr>
@@ -108,13 +92,13 @@
                                     <td><%= data[0].base_fare %></td>
                                     <td><%= data[0].charge_per_km %></td>
                                     <td><%= parseInt(data[1].distance) %></td>
-                                    
+
                                     <% if(data.length>4) {%>
-                                        <td id="payment"><%= data[1].cost %></td>
-                                        <td><%= data[4].total_equipment_cost %></td>
-                                        <td id="payment_info"><%= parseInt(data[4].total_cost) %></td>
+                                    <td id="payment"><%= data[1].cost %></td>
+                                    <td><%= data[4].total_equipment_cost %></td>
+                                    <td id="payment_info"><%= parseInt(data[4].total_cost) %></td>
                                     <%} else {%>
-                                        <td id="payment_info"><%= data[1].cost %></td>
+                                    <td id="payment_info"><%= data[1].cost %></td>
                                     <% } %>
                                 </tr>
                             </table>
@@ -122,8 +106,8 @@
                     </div>
                 </div>
             </div>
+            <br>
             <div class="col-lg-12">
-                <h2 id="after_post"></h2>
                 <button class="btn_2" href="" name="confirm_booking" id="confirm">Confirm Booking</button>
                 <button class="btn_2" id="go_back" href="main.ejs">Go Back</button>
             </div>
@@ -157,20 +141,20 @@
         console.log(hid, hidx, hidy, patient_x, patient_y, payment_info)
 
         fetch('/ambulance/confirmation/' + x, {
-                method: 'post',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "problem": problem,
-                    "hidx": hidx,
-                    "hidy": hidy,
-                    "patient_x": patient_x,
-                    "patient_y": patient_y,
-                    "hid": hid,
-                    "payment_info": payment_info,
-                }),
-            })
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "problem": problem,
+                "hidx": hidx,
+                "hidy": hidy,
+                "patient_x": patient_x,
+                "patient_y": patient_y,
+                "hid": hid,
+                "payment_info": payment_info,
+            }),
+        })
             .then((response) => {
                 return response.json()
             })
