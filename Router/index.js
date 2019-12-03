@@ -145,12 +145,14 @@ app.post('/',urlencodedparser,(req,res)=>{
     if (typeof(req.body.problem)!='string' || req.body.problem=="General"){
         var data=[];
         var hospital_data=[]
+        var ambulance_data=[]
         var amb_vehicle_no = 0;
         var total_distance = 0;
         db.query(`Select * from Ambulance_loc where status='Available'`,(err,results)=>{
             // console.log(results);
             var points=[];
             k=0;
+            ambulance_data=results;
             min_distance=99999;
             min_distance_index=-1;
             for (i of results){
@@ -209,7 +211,11 @@ app.post('/',urlencodedparser,(req,res)=>{
                         patient_y:req.body.y
                     })
                     // localstorage.setItem('data',data);
-                    res.render('results',{data:data,hospital_data:JSON.stringify(hospital_data)});
+                    res.render('results',{
+                        data:data,
+                        hospital_data:JSON.stringify(hospital_data),
+                        ambulance_data:JSON.stringify(ambulance_data)
+                    });
                 }
             });
 
@@ -232,6 +238,7 @@ app.post('/',urlencodedparser,(req,res)=>{
             having count(Amb.vehicle_no)=(select count(Tools) from Diseases where Disease='${req.body.problem}'))`,(err,results)=>{
                 if(err) throw err;
                 else{
+                    ambulance_data=results;
                     var min_dist=20000;
                     var min_index=-1
                     var k=0;
@@ -298,7 +305,12 @@ app.post('/',urlencodedparser,(req,res)=>{
                                 });   
                                 console.log(data);
                                 // hospital_data=JSON.stringify(hospital_data:hospital_data)
-                                res.render('results',{data:data,equipment_data:equipment_data,hospital_data:JSON.stringify(hospital_data)});
+                                res.render('results',{
+                                    data:data,
+                                    equipment_data:equipment_data,
+                                    hospital_data:JSON.stringify(hospital_data),
+                                    ambulance_data:JSON.stringify(ambulance_data)
+                                });
                             }
                         })
                     }
@@ -312,34 +324,35 @@ app.post('/',urlencodedparser,(req,res)=>{
                         console.log('query executed');
                         if(err) throw console.log("Error Occured");
                         else{
-                            hospital_data=results;
-                        var points=[];
-                        k=0;
-                        min_distance=99999;
-                        min_distance_index=-1;
-                        console.log('results',results)
-                        for (i of results){
-                            var distance=findistance([req.body.x,req.body.y],[i.x,i.y])
-                            if (distance<min_distance){
-                                min_distance=distance;
-                                min_distance_index=k;
+                            ambulance_data=results;
+                            var points=[];
+                            k=0;
+                            min_distance=99999;
+                            min_distance_index=-1;
+                            console.log('results',results)
+                            for (i of results){
+                                var distance=findistance([req.body.x,req.body.y],[i.x,i.y])
+                                if (distance<min_distance){
+                                    min_distance=distance;
+                                    min_distance_index=k;
+                                }
+                                k+=1;
                             }
-                            k+=1;
-                        }
-                        amb_vehicle_no = results[min_distance_index].vehicle_no
-                        data.push({
-                            vehicle_no:results[min_distance_index].vehicle_no,
-                            x:results[min_distance_index].x,
-                            y:results[min_distance_index].y,
-                            base_fare:results[min_distance_index].base_fare, 
-                            charge_per_km:results[min_distance_index].charge_per_km,
-                            problem:req.body.problem
-                        });
+                            amb_vehicle_no = results[min_distance_index].vehicle_no
+                            data.push({
+                                vehicle_no:results[min_distance_index].vehicle_no,
+                                x:results[min_distance_index].x,
+                                y:results[min_distance_index].y,
+                                base_fare:results[min_distance_index].base_fare, 
+                                charge_per_km:results[min_distance_index].charge_per_km,
+                                problem:req.body.problem
+                            });
                         }
                     });
                     db.query(`Select * from Hospitals`,(err,results)=>{
                         if(err) throw err;
                         else{
+                            hospital_data=results;
                             var min_dist=20000;
                             var min_index=-1;
                             var k=0;
@@ -372,7 +385,11 @@ app.post('/',urlencodedparser,(req,res)=>{
                                 patient_y:req.body.y
                             })
                             console.log('@@@@@@data',data)
-                            res.render('results',{data:data,hospital_data:hospital_data});
+                            res.render('results',{
+                                data:data,
+                                hospital_data:JSON.stringify(hospital_data),
+                                ambulance_data:JSON.stringify(ambulance_data)
+                            });
                         }
                     });
                 });

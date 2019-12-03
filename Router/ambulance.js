@@ -91,7 +91,7 @@ router.post('/register',function(req,res){
                         })
                         .catch(err => console.log(err));
                     })
-                })
+                });
             }
         });
     }
@@ -144,7 +144,8 @@ router.post('/confirmation/:vehicle_no',urlencoded,(req,res)=>{
                 console.log('inside amulance io');
                 io.sockets.emit('send detail to driver',data);
             })
-            if(req.body.problem!='')
+            console.log(req.body.problem)
+            if(req.body.problem!='General')
                 optimizeAmbulanceLocation(req.body.problem)
             console.log('starts here');
             res.json(JSON.stringify({data:req.body}))

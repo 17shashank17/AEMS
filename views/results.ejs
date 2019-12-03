@@ -1,4 +1,12 @@
 <!-- ::header part start:: -->
+<style>
+    #canvas_a{
+        text-align: center;
+        border: solid 2px black;
+        margin-left: 100px;
+        margin-top: 30px;
+    }
+</style>
 <header class="main_menu home_menu">
     <div class="container">
         <div class="row align-items-center">
@@ -7,7 +15,7 @@
                     <a class="navbar-brand" href="/">
                         <h1>AEMS</h1>
                     </a>
-                    <a class="btn_2 d-none d-lg-block" href="/ambulance/login">Login</a>
+                    <a style="margin-left:800px" class="btn_2 d-none d-lg-block" href="/ambulance/login">Login</a>
                 </nav>
             </div>
         </div>
@@ -43,7 +51,7 @@
                                 </tr>
                                 <tr>
                                     <td id="vehicle"><%= data[0].vehicle_no %></td>
-                                    <td><%= data[0].x %>-<%= data[0].y %></td>
+                                    <td><span id="ambx"><%= data[0].x %></span>-<span id="amby"><%= data[0].y %></span></td>
 
                                     <td id="problem"><%= data[0].problem %></td>
 
@@ -109,13 +117,17 @@
             <br>
             <div class="col-lg-12">
                 <button class="btn_2" href="" name="confirm_booking" id="confirm">Confirm Booking</button>
-                <button class="btn_2" id="go_back" href="main.ejs">Go Back</button>
+                <button class="btn_2" id="go_back" href="main.ejs">Go Back</button><br>
+            </div><br><br>
+            <object id="hospital_data" width="50" height="50" data="<%= hospital_data %>"></object>
+            <object id="ambulance_data" width="50" height="50" data="<%= ambulance_data %>"></object>
+            <div id="canvas_a">
+            &nbsp;&nbsp;<canvas id="canv" width="700" height="700"></canvas>
             </div>
-            <object id="hospital_data" width="400" height="400" data="<%= hospital_data %>"></object>
-            <canvas id="canv" width="600" height="600"></canvas>
         </div>
         
     </div>
+    
     
 </section>
 
@@ -123,32 +135,208 @@
     var i=5;
 
     window.onload=function(){
+
+        hidx=document.getElementById('hidx').innerHTML;
+        hidy=document.getElementById('hidy').innerHTML;
+        ambx=document.getElementById('ambx').innerHTML;
+        amby=document.getElementById('amby').innerHTML;
+        patient_x=document.getElementById('patient_x').innerHTML;
+        patient_y=document.getElementById('patient_y').innerHTML;
+
         hospital_data=document.getElementById('hospital_data').data;
         console.log(hospital_data);
         hospital_data=hospital_data.split("http://localhost:8080/");
         hospital_data=hospital_data[1];
-        var data_encoded='';
+        var data_encoded='%';
         for(var i=2;i<hospital_data.length-2;i++){
             data_encoded+=hospital_data[i]
         }
+        data_encoded+='D';
         console.log(data_encoded)
         data_decoded=decodeURI(data_encoded)
         console.log(data_decoded);
-        data_decoded=data_decoded.split
-        //data=JSON.parse(data_decoded);
-        //console.log(data);
-        // hospital_data=JSON.parse(hospital_data);
-        // console.log(hospital_data);
+        data=data_decoded.split('},{');
+        for(var i=0;i<data.length-1;i++){
+            data[i]+='}'
+        }
+        for(var i=1;i<data.length;i++){
+            data[i]='{'+data[i];
+        }
+        // console.log(data);
+        // console.log(data[0]);
+        // console.log(data[1]);
+        // console.log(data[2]);
+        // console.log(data[3]);
+        // console.log(data[4]);
         
         canv=document.getElementById("canv");
         ctx=canv.getContext("2d");
-        ctx.fillStyle="linen";
+        //ctx.fillStyle="#FAFAD2";
+        ctx.fillStyle="#FFFFE0";
+
         ctx.fillRect(0,0,canv.width,canv.height);
+        for(var i=0;i<data.length;i++){
+            canvas_hospital_data=JSON.parse(data[i])
+            if(canvas_hospital_data.x==hidx && canvas_hospital_data.y==hidy){
+                ctx.fillStyle='yellow';
+                ctx.beginPath();
+                ctx.arc(canvas_hospital_data.x*5, canvas_hospital_data.y*5, 8, 0, 2 * Math.PI);
+                ctx.fill();     
+            }
+            else{
+                ctx.fillStyle='blue';
+                ctx.beginPath();
+                ctx.arc(canvas_hospital_data.x*5, canvas_hospital_data.y*5, 8, 0, 2 * Math.PI);
+                ctx.fill();
+            } 
+
+        }
+        ambulance_data=document.getElementById('ambulance_data').data;
+        console.log(ambulance_data)
+        ambulance_data=ambulance_data.split("http://localhost:8080/");
+        ambulance_data=ambulance_data[1];
+        console.log(ambulance_data)
+        data_encoded=''
+        for(var i=1;i<ambulance_data.length-1;i++){
+            data_encoded+=ambulance_data[i]
+        }
+        console.log('@@@@@',data_encoded)
+        data_decoded=decodeURI(data_encoded)
+        console.log(data_decoded);
+        data=data_decoded.split('},{');
+        console.log(data)
+        for(var i=0;i<data.length-1;i++){
+            data[i]+='}'
+        }
+        for(var i=1;i<data.length;i++){
+            data[i]='{'+data[i];
+        }
+        for(var i=0;i<data.length;i++){
+            canvas_ambulance_data=JSON.parse(data[i])
+            if(canvas_ambulance_data.x==ambx && canvas_ambulance_data.y==amby){
+                ctx.fillStyle='gray';
+                ctx.beginPath();
+                ctx.arc(canvas_ambulance_data.x*5, canvas_ambulance_data.y*5, 8, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            else{
+                ctx.fillStyle='red';
+                ctx.beginPath();
+                ctx.arc(canvas_ambulance_data.x*5, canvas_ambulance_data.y*5, 8, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        //patients location
+        ctx.fillStyle='black';
+        ctx.beginPath();
+        ctx.arc(patient_x*5, patient_y*5, 8, 0, 2 * Math.PI);
+        ctx.fill();  
 
         ctx.fillStyle='blue';
         ctx.beginPath();
-        ctx.arc(10, 10, 5, 0, 2 * Math.PI);
+        ctx.arc(510, 510, 5, 0, 2 * Math.PI);
         ctx.fill();
+        ctx.font = "15px Arial";
+        ctx.strokeText("Hospitals", 520, 515); 
+
+        ctx.fillStyle='red';
+        ctx.beginPath();
+        ctx.arc(510, 540, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.font = "15px Arial";
+        ctx.strokeText("Ambulances", 520, 545);
+
+        ctx.fillStyle='yellow';
+        ctx.beginPath();
+        ctx.arc(510, 570, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.font = "15px Arial";
+        ctx.strokeText("Hospital Alloted", 520, 575);
+
+        ctx.fillStyle='gray';
+        ctx.beginPath();
+        ctx.arc(510, 600, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.font = "15px Arial";
+        ctx.strokeText("Ambulance Alloted", 520, 605);
+
+        ctx.fillStyle='black';
+        ctx.beginPath();
+        ctx.arc(510, 630, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.font = "15px Arial";
+        ctx.strokeText("Patient Location", 520, 635);
+
+        //draw line
+        ctx.beginPath();
+        ctx.moveTo(patient_x*5, patient_y*5);
+        ctx.lineTo(ambx*5, amby*5);
+        ctx.lineWidth=6;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(patient_x*5, patient_y*5);
+        ctx.lineTo(hidx*5, hidy*5);
+        ctx.lineWidth=6;
+        ctx.strokeStyle='green';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(500, 660);
+        ctx.lineTo(514, 660);
+        ctx.lineWidth=6;
+        ctx.strokeStyle='black';
+        ctx.stroke();
+        ctx.lineWidth=1;
+        ctx.font = "15px Arial";
+        ctx.strokeText("Ambulance To Patient", 520, 665);
+
+        ctx.beginPath();
+        ctx.moveTo(500, 690);
+        ctx.lineTo(514, 690);
+        ctx.lineWidth=6;
+        ctx.strokeStyle='green';
+        ctx.stroke();
+        ctx.lineWidth=1;
+        ctx.strokeStyle='black';
+        ctx.font = "15px Arial";
+        ctx.strokeText("Patient To Hospital", 520, 695);
+
+        // ctx.beginPath();
+        // ctx.moveTo(10, 0);
+        // ctx.lineTo(10, 500);
+        // ctx.lineWidth=6;
+        // ctx.stroke();
+
+        // ctx.beginPath();
+        // ctx.moveTo(10, 500);
+        // ctx.lineTo(510, 500);
+        // ctx.lineWidth=6;
+        // ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, 525);
+        ctx.lineTo(500, 525);
+        ctx.lineWidth=1;
+        ctx.strokeStyle='black';
+        ctx.stroke();
+       
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, 525);
+        ctx.lineWidth=1;
+        ctx.strokeStyle='black';
+        ctx.stroke();
+
+        /*for(var i=1;i<10;i++){
+            ctx.beginPath();
+            ctx.moveTo(i*50, 520);
+            ctx.lineTo(1*50, 530);
+            ctx.lineWidth=1;
+            ctx.strokeStyle='black';
+            ctx.stroke(); 
+        }*/
         
     }
 </script>
